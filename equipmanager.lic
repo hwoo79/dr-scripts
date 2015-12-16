@@ -6,8 +6,9 @@ class EquipmentManager
     UserVars.gear_sets = {} unless UserVars.gear_sets
   end
 
-  def check_equipment(set_name)
-    worn_items = UserVars.gear_sets[set_name]
+  def wear_equipment_set(set_name)
+    items = UserVars.gear
+    worn_items = UserVars.gear_sets[set_name].map{|description| items.find{|item| item.description == description } }.compact
     unless worn_items
       echo("Could not find gear set #{set_name}")
       return
@@ -15,9 +16,21 @@ class EquipmentManager
 
     combat_items = get_combat_items
 
-    combat_items << bput('glance', 'You glance .*') if checkleft || checkright
+    echo "#{combat_items}"
+    echo "#{worn_items}"
 
-    missing_items = worn_items.reject { |item| combat_items.include?(item.description) }
+    combat_items
+      .select{|description| !worn_items.find{|item| item.description == description} }
+      .map{|description| items.find{|item| item.description == description } }
+      .compact
+      .each{|item| remove_item(item) }
+
+    held = bput('glance', 'You glance .*') if checkleft || checkright
+
+    missing_items = worn_items
+      .reject { |item| combat_items.include?(item.description)}
+      .reject { |item| held.include?(item.description) ? fput("wear my #{item.name}") : false }
+
 
     lost_items = missing_items.reject { |item| wear_item(item) }
 
@@ -37,12 +50,17 @@ class EquipmentManager
     data = reget(30)
     data = data
            .map(&:strip)
-           .drop_while { |item| !['All of your combat:', "You aren't wearing anything like that."].include?(item) }
            .reverse
+           .take_while { |item| !['All of your combat:', "You aren't wearing anything like that."].include?(item) }
            .drop_while { |item| item != '[Type INVENTORY HELP for more options]' }
-    data.shift
+           .reverse
     data.pop
     data
+  end
+
+  def remove_item(item)
+    bput("remove my #{item.name}", 'You ')
+    bput("stow my #{item.name}", 'You ')
   end
 
   def wear_item(item)
@@ -61,4 +79,4 @@ class EquipmentManager
 
 end
 
-$EquipmentManager = $EquipmentManager || EquipmentManager.new
+$EquipmentManager = EquipmentManager.new
