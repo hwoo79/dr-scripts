@@ -1,0 +1,44 @@
+
+UserVars.gear = [
+    DRC::Item.new(name: 'balaclava', leather: false, hinders_locks: true, description: 'a lumium chain balaclava crafted from tempered links'),
+    DRC::Item.new(name: 'cowl', leather: true, hinders_locks: true, description: 'a rugged leather cowl'),
+    DRC::Item.new(name: 'gloves', leather: false, hinders_locks: true, description: 'some lumium mail gloves'),
+    DRC::Item.new(name: 'gloves', leather: true, hinders_locks: true, description: 'some rugged gloves'),
+    DRC::Item.new(name: 'targe', leather: true, hinders_locks: true, description: 'a shalswar-hide targe sealed with protective wax'),
+    DRC::Item.new(name: 'leathers', leather: true, description: 'some thick shalswar-hide leathers with fitted seams'),
+    DRC::Item.new(name: 'parry stick', leather: false, description: 'a polished steel parry stick'),
+    DRC::Item.new(name: 'knuckles', leather: false, hinders_locks: true, description: 'some brass knuckles'),
+    DRC::Item.new(name: 'spikes', leather: false, description: 'some silver-chased elbow spikes'),
+    DRC::Item.new(name: 'longbow', leather: false, description: 'an osage battle longbow')
+  ]
+
+UserVars.gear_sets = {
+  'standard' => [
+    'a lumium chain balaclava crafted from tempered links',
+    'some lumium mail gloves',
+    'a shalswar-hide targe sealed with protective wax',
+    'some thick shalswar-hide leathers with fitted seams',
+    'a polished steel parry stick',
+    'some brass knuckles',
+    'some silver-chased elbow spikes',
+    'an osage battle longbow'
+  ],
+  'leather'=> [
+    'a rugged leather cowl',
+    'some rugged gloves',
+    'a shalswar-hide targe sealed with protective wax',
+    'some thick shalswar-hide leathers with fitted seams',
+    'a polished steel parry stick',
+    'some brass knuckles',
+    'some silver-chased elbow spikes',
+    'an osage battle longbow'
+  ],
+  'naked' => [
+  ]
+
+}
+
+$EquipmentManager.wear_equipment_set('naked')
+$EquipmentManager.wear_equipment_set('standard')
+$EquipmentManager.wear_equipment_set('leather')
+$EquipmentManager.wear_equipment_set('standard')
