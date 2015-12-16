@@ -367,20 +367,6 @@ module DRC
   end
   module_function :bind_wound
 
-  def get_combat_items
-    bput('inv combat', 'Type INVENTORY HELP for more options')
-    data = reget(30)
-    data = data
-           .map(&:strip)
-           .drop_while { |item| !['All of your combat:', "You aren't wearing anything like that."].include?(item) }
-           .reverse
-           .drop_while { |item| item != '[Type INVENTORY HELP for more options]' }
-    data.shift
-    data.pop
-    data
-  end
-  module_function :get_combat_items
-
   def unwrap_wound(part)
     waitrt?
     case bput("unwrap my #{part}", 'You unwrap your bandages') # Are there other messages?
@@ -391,21 +377,6 @@ module DRC
     waitrt?
   end
   module_function :unwrap_wound
-
-  def wear_item(item)
-    $ORDINALS.each do |ordinal|
-      case bput("get my #{ordinal} #{item.name}", "^You get #{item.description}", '^You get ', '^What were you referring', 'You are already holding that')
-      when /^You get #{item.description}/, /You are already holding that/
-        fput("wear my #{item.name}")
-        return true
-      when /^You get /
-        fput("stow my #{item.name}")
-      else
-        return false
-      end
-    end
-  end
-  module_function :wear_item
 
   def minimize_coins(copper)
     coins = copper.to_s.reverse

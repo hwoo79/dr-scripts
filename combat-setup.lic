@@ -204,16 +204,20 @@ class CombatTrainerSetup
 
     CombatVars.lootables += UserVars.gem_nouns
 
-    CombatVars.worn_items = [
-      Item.new(name: 'balaclava', leather: false, hinders_locks: true, description: 'a lumium chain balaclava crafted from tempered links'),
-      Item.new(name: 'gloves', leather: false, hinders_locks: true, description: 'some lumium mail gloves'),
-      Item.new(name: 'shield', leather: true, hinders_locks: true, description: 'a shalswar-hide targe sealed with protective wax'),
-      Item.new(name: 'leathers', leather: true, description: 'some thick shalswar-hide leathers with fitted seams'),
-      Item.new(name: 'parry stick', leather: false, description: 'a polished steel parry stick'),
-      Item.new(name: 'knuckles', leather: false, hinders_locks: true, description: 'some brass knuckles'),
-      Item.new(name: 'spikes', leather: false, description: 'some silver-chased elbow spikes'),
-      Item.new(name: 'longbow', leather: false, description: 'an osage battle longbow')
-    ]
+    UserVars.gear_sets = {
+      "standard" => [
+        Item.new(name: 'balaclava', leather: false, hinders_locks: true, description: 'a lumium chain balaclava crafted from tempered links'),
+        Item.new(name: 'gloves', leather: false, hinders_locks: true, description: 'some lumium mail gloves'),
+        Item.new(name: 'shield', leather: true, hinders_locks: true, description: 'a shalswar-hide targe sealed with protective wax'),
+        Item.new(name: 'leathers', leather: true, description: 'some thick shalswar-hide leathers with fitted seams'),
+        Item.new(name: 'parry stick', leather: false, description: 'a polished steel parry stick'),
+        Item.new(name: 'knuckles', leather: false, hinders_locks: true, description: 'some brass knuckles'),
+        Item.new(name: 'spikes', leather: false, description: 'some silver-chased elbow spikes'),
+        Item.new(name: 'longbow', leather: false, description: 'an osage battle longbow')
+      ]
+    }
+
+    CombatVars.worn_items = "standard"
   end
 
   def etreu_backtrain

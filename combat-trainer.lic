@@ -739,7 +739,7 @@ class CombatTrainer
     training_abilities = combat_vars.training_abilities
     is_empath = !combat_vars.empath.nil?
 
-    check_equipment(worn_items)
+    $EquipmentManager.check_equipment(worn_items)
 
     game_state = {
       'dancing' => false,
@@ -779,28 +779,9 @@ class CombatTrainer
     end
   end
 
-  def check_equipment(worn_items)
-    return unless worn_items
-    combat_items = get_combat_items
-
-    missing_items = worn_items.reject { |item| combat_items.include?(item.description) }
-
-    lost_items = missing_items.reject { |item| wear_item(item) }
-
-    return if lost_items.empty?
-
-    beep
-    echo 'MISSING EQUIPMENT: Please verify these items are in a closed container and not lost:'
-    echo "#{lost_items.map(&:description).join(', ')}"
-    pause
-    beep
-    pause
-    beep
-  end
-
   def setup
     # Run helper scripts
-    %w(common drinfomon events spellmonitor).each do |script_name|
+    %w(common drinfomon events spellmonitor equipmanager).each do |script_name|
       unless running?(script_name)
         start_script script_name
         pause 0.25
