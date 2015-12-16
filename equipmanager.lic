@@ -4,45 +4,65 @@ class EquipmentManager
 
   def initialize
     UserVars.gear_sets = {} unless UserVars.gear_sets
+    @items = UserVars.gear
+  end
+
+  def remove_gear_for_locksmithing
+    combat_items = get_combat_items
+
+    desc_to_items(combat_items).select(&:hinders_lockpicking?).each{|item| remove_item(item)}
+  end
+
+  def wear_items(items)
+    @items.each{ |item| wear_item(item) }
   end
 
   def wear_equipment_set(set_name)
-    items = UserVars.gear
-    worn_items = UserVars.gear_sets[set_name].map{|description| items.find{|item| item.description == description } }.compact
+    worn_items = desc_to_items(UserVars.gear_sets[set_name])
     unless worn_items
       echo("Could not find gear set #{set_name}")
-      return
+      return false
     end
 
     combat_items = get_combat_items
 
-    echo "#{combat_items}"
-    echo "#{worn_items}"
+    remove_unmatched_items(combat_items, worn_items)
 
-    combat_items
-      .select{|description| !worn_items.find{|item| item.description == description} }
-      .map{|description| items.find{|item| item.description == description } }
-      .compact
-      .each{|item| remove_item(item) }
+    lost_items = wear_missing_items(worn_items, combat_items)
 
+    lost_items.empty? ? true : notify_missing(lost_items)
+
+  end
+
+  def desc_to_items(descs)
+    descs.map{|description| @items.find{|item| item.description == description } }.compact
+  end
+
+  def notify_missing(lost_items)
+    beep
+    echo 'MISSING EQUIPMENT: Please verify these items are in a closed container and not lost:'
+    echo "#{lost_items.map(&:description).join(', ')}"
+    pause
+    beep
+    false
+  end
+
+  def wear_missing_items(worn_items, combat_items)
     held = bput('glance', 'You glance .*') if checkleft || checkright
 
     missing_items = worn_items
       .reject { |item| combat_items.include?(item.description)}
       .reject { |item| held.include?(item.description) ? fput("wear my #{item.name}") : false }
 
+    missing_items.reject { |item| wear_item(item) }
+  end
 
-    lost_items = missing_items.reject { |item| wear_item(item) }
-
-    return if lost_items.empty?
-
-    beep
-    echo 'MISSING EQUIPMENT: Please verify these items are in a closed container and not lost:'
-    echo "#{lost_items.map(&:description).join(', ')}"
-    pause
-    beep
-    pause
-    beep
+  def remove_unmatched_items(combat_items, worn_items)
+    combat_items
+      .select{|description| !worn_items.find{|item| item.description == description} }
+      .map{|description| @items.find{|item| item.description == description } }
+      .compact
+      .each{|item| remove_item(item) }
   end
 
   def get_combat_items
@@ -60,7 +80,9 @@ class EquipmentManager
 
   def remove_item(item)
     bput("remove my #{item.name}", 'You ')
-    bput("stow my #{item.name}", 'You ')
+    waitrt?
+    bput("stow my #{item.name}", 'You put')
+    waitrt?
   end
 
   def wear_item(item)
@@ -68,6 +90,7 @@ class EquipmentManager
       case bput("get my #{ordinal} #{item.name}", "^You get #{item.description}", '^You get ', '^What were you referring', 'You are already holding that')
       when /^You get #{item.description}/, /You are already holding that/
         fput("wear my #{item.name}")
+        waitrt?
         return true
       when /^You get /
         fput("stow my #{item.name}")

@@ -37,8 +37,12 @@ UserVars.gear_sets = {
   ]
 
 }
-
-$EquipmentManager.wear_equipment_set('naked')
-$EquipmentManager.wear_equipment_set('standard')
-$EquipmentManager.wear_equipment_set('leather')
-$EquipmentManager.wear_equipment_set('standard')
+# echo("strip")
+gear = $EquipmentManager.remove_gear_for_locksmithing
+$EquipmentManager.wear_items(gear)
+# echo("standard")
+# $EquipmentManager.wear_equipment_set('standard')
+# echo("leather")
+# $EquipmentManager.wear_equipment_set('leather')
+# echo("standard")
+# $EquipmentManager.wear_equipment_set('standard')
