@@ -247,15 +247,17 @@ module DRC
   # combat is if the item should be worn before engaging in combat.
   # Item.new(name:'gloves', leather:true, hinders_locks:true, description:'some coarse gargoyle-hide gloves with fitted seams', combat:true)
   class Item
-    attr_accessor :name, :is_leather, :is_worn, :hinders_lockpicking, :description, :combat, :container
+    attr_accessor :name, :is_leather, :is_worn, :hinders_lockpicking, :description, :combat, :container, :swappable
 
-    def initialize(name:nil, leather:nil, worn:true, hinders_locks:nil, description:nil, combat:nil, container:nil)
+    def initialize(name:nil, leather:nil, worn:true, hinders_locks:nil, description:nil, combat:nil, container:nil, swappable:false)
       @name = name
       @is_leather = leather
       @is_worn = worn
       @hinders_lockpicking = hinders_locks
       @description = description
       @combat = combat
+      @container = container
+      @swappable = swappable
     end
 
     def is_leather?

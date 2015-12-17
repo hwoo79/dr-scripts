@@ -7,14 +7,15 @@ class EquipmentManager
     @items = UserVars.gear
   end
 
-  def remove_gear_for_locksmithing
+  def remove_gear_by(&block)
     combat_items = get_combat_items
-
-    desc_to_items(combat_items).select(&:hinders_lockpicking?).each{|item| remove_item(item)}
+    gear = desc_to_items(combat_items).select{|item|block.call(item)}
+    gear.each{|item| remove_item(item)}
+    gear
   end
 
-  def wear_items(items)
-    @items.each{ |item| wear_item(item) }
+  def wear_items(items_list)
+    items_list.each{ |item| wear_item(item) }
   end
 
   def wear_equipment_set(set_name)
@@ -35,7 +36,11 @@ class EquipmentManager
   end
 
   def desc_to_items(descs)
-    descs.map{|description| @items.find{|item| item.description == description } }.compact
+    descs.map{|description| item_by_desc(description) }.compact
+  end
+
+  def item_by_desc(description)
+    @items.find{|item| item.description == description }
   end
 
   def notify_missing(lost_items)
@@ -97,6 +102,62 @@ class EquipmentManager
       else
         return false
       end
+    end
+  end
+
+  def wield_weapon(description, skill = nil)
+    weapon = item_by_desc(description)
+    if weapon.is_worn?
+      $ORDINALS.each do |ordinal|
+        case bput("remove my #{ordinal} #{weapon.name}", "You sling #{weapon.description}", "You remove #{weapon.description}", "You sling", "You get", "Remove what")
+        when "You sling", "You get"
+          return true
+        when "Remove what"
+          return false
+        else
+          bput("wear my #{item.name}", "You sling", "You attach")
+        end
+      end
+    else
+      $ORDINALS.each do |ordinal|
+        case bput("get my #{ordinal} #{weapon.name}", "You get #{weapon.description}", "^You get", "^What were you referring")
+        when "You get"
+          bput("stow my #{weapon.name}", "You put")
+        when "What were you referring"
+          return false
+        else
+          swap_to_skill(weapon.name, skill)
+          return true
+        end
+      end
+    end
+  end
+
+  def swap_to_skill(noun, skill)
+    proper_skill = case skill
+      when /^he$|heavy edge|large edge/i
+        "heavy edged"
+      when /2he|^the$|twohanded edge/i
+        "two-handed edged"
+      when /2hb|^thb$|twohanded blunt/i
+        "two-handed blunt"
+      when /^hb$|heavy blunt|large blunt/i
+        "heavy blunt"
+      else
+        echo("unsupported weapon swap, please help us add this weapon")
+      end
+
+    until "used as a #{proper_skill} weapon" == bput("swap my #{noun}", "used as a #{proper_skill} weapon", "used as a .* weapon")
+      pause 0.25
+    end
+  end
+
+  def stow_weapon(description)
+    weapon = item_by_desc(description)
+    if weapon.is_worn?
+      bput("wear my #{weapon.name}", "You sling", "You attach")
+    else
+      bput("stow my #{weapon.name}", "You put")
     end
   end
 

@@ -9,7 +9,9 @@ UserVars.gear = [
     DRC::Item.new(name: 'parry stick', leather: false, description: 'a polished steel parry stick'),
     DRC::Item.new(name: 'knuckles', leather: false, hinders_locks: true, description: 'some brass knuckles'),
     DRC::Item.new(name: 'spikes', leather: false, description: 'some silver-chased elbow spikes'),
-    DRC::Item.new(name: 'longbow', leather: false, description: 'an osage battle longbow')
+
+    DRC::Item.new(name: 'longbow', leather: false, description: 'an osage battle longbow'),
+    DRC::Item.new(name: 'sword', leather: false, worn:false, description: 'a bastard sword'),
   ]
 
 UserVars.gear_sets = {
@@ -23,23 +25,20 @@ UserVars.gear_sets = {
     'some silver-chased elbow spikes',
     'an osage battle longbow'
   ],
-  'leather'=> [
-    'a rugged leather cowl',
-    'some rugged gloves',
-    'a shalswar-hide targe sealed with protective wax',
-    'some thick shalswar-hide leathers with fitted seams',
-    'a polished steel parry stick',
-    'some brass knuckles',
-    'some silver-chased elbow spikes',
-    'an osage battle longbow'
-  ],
   'naked' => [
   ]
-
 }
+
+start_script('equipmanager')
+pause 1
+
 # echo("strip")
-gear = $EquipmentManager.remove_gear_for_locksmithing
-$EquipmentManager.wear_items(gear)
+# $EquipmentManager.wear_equipment_set('standard')
+ gear = $EquipmentManager.remove_gear_by{|item| item.hinders_lockpicking?}
+ $EquipmentManager.wear_items(gear)
+# $EquipmentManager.wield_weapon('a bastard sword', 'heavy edge')
+# $EquipmentManager.stow_weapon('a bastard sword')
+# $EquipmentManager.wield_weapon('a bastard sword', '2he')
 # echo("standard")
 # $EquipmentManager.wear_equipment_set('standard')
 # echo("leather")
