@@ -4,100 +4,65 @@
   Repeatedly trains non-combat and combat skills.
 =end
 
-custom_require(%w(common drinfomon sell-loot))
+custom_require(%w(common drinfomon sell-loot hunting-buddy))
 
 class TrainingManager
   include DRC
 
-  def setup
-    @autopuff = 6218
-
-    @rats = [6049, 6048, 6047, 6046, 6050, 6053, 6054]
-    @louts = [686, 687, 688, 19_199, 690]
-    @hogs = (1438..1448)
-    @goblins = [1473, 1479, 1483, 1486, 1484, 1480]
-    @scouts = (7292..7299) # This is about half of the area
-    @reavers = [1850, 1851, 1852, 1856, 1848, 1849]
-    @rock_trolls = [8946, 8947, 8954, 8955, 8948, 8949]
-    @snowbeasts = [2255, 2268, 2263, 2256, 2265, 2266, 2272, 2259, 2260, 2262, 2267, 2269, 2270, 2261] # 2264 causes a loop, do not use
-    @young_ogres = [1587, 1588, 1591, 1592, 1593, 1590, 1589]
-    @dire_bears = [1563, 1565, 1566, 1582, 1581, 1578] # 1555 is bugged, do not use
-
-    @hunting_info = case checkname
-                    when 'Sarikis'
-                      [[@rock_trolls, %w(d0), 20]]
-                    when 'Thurmond'
-                      [[@young_ogres, %w(d0 r4), 30]]
-                    when 'Torgro'
-                      [[@young_ogres, %w(d0), 30]]
-                    when 'Sheltim'
-                      [[@dire_bears, %w(d0), 20]]
-                    end
-
-    @loot_info = case checkname
-                 when 'Torgro'
-                   %w(runestone)
-                 when 'Sheltim'
-                   UserVars.box_nouns
-                 else
-                   []
-                 end
-
-    @drop_info = case checkname
-                 when 'Torgro'
-                   UserVars.box_nouns
-                 when 'Sheltim'
-                   %w(runestone)
-                 else
-                   []
-                 end
-  end
-
   def main
-    setup
-
     loop do
+      settings = get_settings
       clear
       wait_for_script_to_complete('sell-loot')
 
       start_script('crossing-training')
       pause 5
       pause 1 until $CROSSING_TRAINER.idling?
-
       $CROSSING_TRAINER.stop
-
       pause 1 while $CROSSING_TRAINER.is_running?
 
-      @hunting_info.each do |rooms, args, timer, stopon|
-        find_empty_room(rooms, 793, proc { DRRoom.npcs.empty? })
+      wait_for_script_to_complete('hunting-buddy')
 
-        start_script('combat-setup', args)
-        timer.times do |count|
-          echo("#{timer - 1 - count} minutes of hunting remaining")
-          if stopon && stopon.all? { |skill| DRSkill.getxp(skill).to_i > 32 }
-            echo('stopping early due to skills')
-            break
-          end
-          pause 60
-        end
-        $COMBAT_TRAINER.stop
-        pause 1 while $COMBAT_TRAINER.is_running?
-        retreat
-      end
-
-      ensure_copper_on_hand(20_000)
+      ensure_copper_on_hand(settings.safe_room_deposit_threshold)
       walk_to 705
-      fput('listen to selanas')
-      fput('give selanas 1 platinum') if get_wealth > 20_000
-      @loot_info.each do |item|
-        DRRoom.room_objs.grep(/#{item}/).each { |_| fput "stow #{item}" }
+      fput("listen to #{settings.safe_room_empath}")
+      if get_wealth > settings.safe_room_deposit_threshold
+        minimize_coins(settings.safe_room_deposit_amount).each do |amount|
+          fput "give #{settings.safe_room_empath} #{amount}"
+        end
       end
-      @drop_info.each do |item|
-        # TODO: Make this drop each matching item, not one per noun
-        fput("get my #{item}")
-        fput("drop my #{item}")
-      end
+      empty_hands
+      drop(settings.safe_room_drop)
+      loot(settings.safe_room_loot)
       pause 45
+
+      wait_for_script_to_complete('crossing-repair')
+    end
+  end
+
+  def drop(items)
+    items.each do |item|
+      loop do
+        case bput("get my #{item}", 'You get', 'What were you referring')
+        when 'You get'
+          fput "drop #{item}"
+        else
+          break
+        end
+      end
+    end
+  end
+
+  def loot(items)
+    items.each do |item|
+      DRRoom.room_objs.grep(/#{item}/).each do |_|
+        fput "stow #{item}"
+        pause 1
+        next unless checkright == item || checkleft == item
+        fput "drop #{item}"
+        pause 1
+        return
+      end
     end
   end
 end

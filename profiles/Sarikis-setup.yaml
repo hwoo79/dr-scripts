@@ -1,4 +1,9 @@
 ---
+hunting_info:
+- :zone: rock_trolls
+  args:
+  - d0
+  :duration: 20
 gear:
 - :description: a polished steel parry stick
   :name: parry stick
@@ -6,79 +11,76 @@ gear:
   :hinders_lockpicking:
   :is_worn: true
   :swappable: false
-- :description: some metal chain gloves
+  :tie_to:
+- :description: some rugged gloves
   :name: gloves
-  :is_leather: false
+  :is_leather: true
   :hinders_lockpicking: true
   :is_worn: true
   :swappable: false
-- :description: a metal chain balaclava
-  :name: balaclava
-  :is_leather: false
+  :tie_to:
+- :description: a rugged leather cowl
+  :name: cowl
+  :is_leather: true
   :hinders_lockpicking: true
   :is_worn: true
   :swappable: false
-- :description: a chain shirt
-  :name: shirt
-  :is_leather: false
+  :tie_to:
+- :description: some sinuous black leathers
+  :name: leathers
+  :is_leather: true
   :hinders_lockpicking:
   :is_worn: true
   :swappable: false
+  :tie_to:
 - :description: some brass knuckles
   :name: knuckles
   :is_leather: false
   :hinders_lockpicking: true
   :is_worn: true
   :swappable: false
+  :tie_to:
 - :description: some silver-chased elbow spikes
   :name: spikes
   :is_leather: false
   :hinders_lockpicking:
   :is_worn: true
   :swappable: false
+  :tie_to:
 - :description: a metal target shield
   :name: shield
   :is_leather: false
-  :hinders_lockpicking: true
+  :hinders_lockpicking:
   :is_worn: true
   :swappable: false
-- :description: some metal chain greaves
-  :name: greaves
-  :is_leather: true
-  :hinders_lockpicking: true
-  :is_worn: true
-  :swappable: false
+  :tie_to:
 - :description: a lever-drawn light crossbow
   :name: crossbow
-  :is_leather: false
+  :is_leather: true
   :hinders_lockpicking:
   :is_worn: true
   :swappable: false
-- :description: a steel war sword
-  :name: sword
-  :is_leather: false
-  :hinders_lockpicking:
-  :is_worn: false
-  :swappable: true
-- :description: a pine-handled sledgehammer
-  :name: sledgehammer
+  :tie_to:
+- :description: a wide-bladed dagger
+  :name: dagger
   :is_leather: false
   :hinders_lockpicking:
   :is_worn: false
   :swappable: false
+  :tie_to:
 - :description: a triple-weighted bola
   :name: bola
   :is_leather: false
   :hinders_lockpicking:
   :is_worn: false
   :swappable: false
+  :tie_to:
 gear_sets:
   standard:
-  - some metal chain greaves
+  - some sinuous black leathers
   - a metal target shield
-  - a chain shirt
-  - a metal chain balaclava
-  - some metal chain gloves
+  - a rugged leather cowl
+  - some rugged gloves
   - a polished steel parry stick
   - some brass knuckles
   - some silver-chased elbow spikes
@@ -87,13 +89,12 @@ gear_sets:
 aim_fillers:
   Crossbow:
   - bob
-  - analyze
   - bob
   Bow:
   - bob
   - bob
 aim_fillers_stealth:
-  Bow:
+  Crossbow:
   - bob
   - hide
 lootables:
@@ -148,7 +149,22 @@ lootables:
 - opal
 - peridot
 - andalusite
+- coffer
+- strongbox
+- chest
+- caddy
+- trunk
+- casket
+- skippet
+- crate
+- box
 stances:
+  Brawling:
+  - evasion
+  - shield
+  Light Thrown:
+  - evasion
+  - shield
   Bow:
   - evasion
   - shield
@@ -162,17 +178,17 @@ stances:
   - evasion
   - shield
 offensive_spells:
-- skill: Targeted Magic
-  name: Breath of Storms
-  abbrev: bos
-  mana: 6
 - skill: Debilitation
-  name: DALU
-  abbrev: dalu
-  mana: 6
-  cyclic: true
-  expire: this is a cyclic
-buff_spells: {}
+  name: sleep
+  abbrev: sleep
+  mana: 5
+  harmless: true
+training_abilities: {}
+buff_spells:
+  Shadows:
+      abbrev: shadows
+      recast: 1
+      mana: 5
 buff_nonspells: {}
 skinning:
   skin: true
@@ -181,6 +197,7 @@ skinning:
 cambrinth: armband
 charged_maneuvers:
   Brawling: palmstrike
+  Bow: powershot
   Slings: powershot
   Small Edged: cleave
   Large Edged: cleave
@@ -190,23 +207,18 @@ charged_maneuvers:
   Twohanded Blunt: crash
   Staves: twirl
   Polearms: impale
-dance_threshold: 1
-dance_skill: Large Edged
+dance_threshold: 2
+dance_skill: Brawling
 dance_actions:
-- analyze
-- feint
 - bob
-dance_actions_stealth: []
-training_abilities:
-  Hunt:
-    :check: Perception
-    :cooldown: 80
-  Perc:
-    :check: Attunement
-    :cooldown: 120
-  Scream:
-    :check: Bardic Lore
-    :cooldown: 15
+- bob
+- bob
+- bob
+dance_actions_stealth:
+- bob
+- hide
+- stalk
+- bob
 cast_messages:
 - ^You gesture
 - You reach with both
@@ -228,19 +240,16 @@ prep_messages:
 - With tense movements
 - You trace (an|a) (.*) sigil in the air
 - Slow, rich tones form
-- You begin to hum the
-fatigue_regen_threshold: 85
+fatigue_regen_threshold: 90
 fatigue_regen_action: bob
 worn_items: standard
 weapon_training:
-  Offhand Weapon: a triple-weighted bola
-  Small Blunt: a triple-weighted bola
-  Light Thrown: a triple-weighted bola
-  Large Edged: a steel war sword
-  Large Blunt: a pine-handled sledgehammer
-  Twohanded Edged: a steel war sword
   Brawling: ''
+  Light Thrown: a triple-weighted bola
   Crossbow: a lever-drawn light crossbow
+#  Small Blunt: a triple-weighted bola
+#  Small Edged: a wide-bladed dagger
+#  Offhand Weapon: a wide-bladed dagger
 box_nouns:
 - coffer
 - strongbox
@@ -304,10 +313,10 @@ treasure_nouns:
 exp_timers:
   Stealth:
     cooldown: 300
-    timer: 2015-12-30 16:03:04.380196000 -05:00
+    timer: 2016-01-01 12:42:20.697931000 -05:00
   First Aid:
     cooldown: 360
-    timer: 2015-12-30 16:03:04.381196000 -05:00
+    timer: 2016-01-01 12:42:20.697931000 -05:00
   Locksmithing:
     cooldown: 600
     timer:
@@ -315,13 +324,13 @@ exp_timers:
     cooldown: 720
     timer:
   Attunement:
-    cooldown: 65
+    cooldown: 130
     timer:
   Summoning:
     cooldown: 120
     timer:
-  Utility:
-    cooldown: 90
+  Astrology:
+    cooldown: 180
     timer:
 held_cambrinth: true
 cambrinth_cap: 32
@@ -329,33 +338,28 @@ prep_scaling_factor: 0.98
 listen: true
 train_with_spells: true
 training_spells:
-  Utility:
-    abbrev: reson
-    before: fput('get my bola')
-    cast: cast bola
-    after: fput('stow my bola')
-  Warding:
-    abbrev: repr
   Augmentation:
-    abbrev: ecry
+    abbrev: cv
+  Warding:
+    abbrev: psy
+  Utility:
+    abbrev: locate
+    cast: cast sarikis
 training_nonspells: {}
 forge_container: backpack
 forge_hammer: diagonal-peen
-safe_room: 851
+safe_room: 793
 hide_to_steal: true
 hand_armor: gloves
 exit_on_skills_capped: false
 crossing_training:
-- First Aid
 - Appraisal
-- Athletics
-- Augmentation
-- Attunement
-- Utility
 - Mechanical Lore
 - Outdoorsmanship
-- Warding
 - Perception
-- Scholarship
-- Forging
 - Performance
+skill_cap: 123
+
+
+picking_box_source: pack
+picking_box_storage: sack

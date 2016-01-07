@@ -1,0 +1,25 @@
+
+weapon_training:
+  Brawling: ''
+  Large Edged: a bastard sword
+  Twohanded Edged: a bastard sword
+  Small Blunt: a triple-weighted bola
+  Light Thrown: a triple-weighted bola
+  Offhand Weapon: a triple-weighted bola
+  Large Blunt: a darkstone riste
+  Twohanded Blunt: a darkstone riste
+  Heavy Thrown: a long-handled throwing hammer with a steel head bearing the crest of the Clerics' Guild
+
+dance_threshold: 0
+dance_skill: Large Edged
+
+buff_spells:
+  Claws of the Cougar:
+    abbrev: cotc
+    recast: -1
+    mana: 15
+    cambrinth:
+    - 5
+    - 5
+offensive_spells: {}
+training_abilities: {}

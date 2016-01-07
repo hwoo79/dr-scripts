@@ -149,6 +149,7 @@ class LootProcess
     @lootables = lootables
     @arrange_types = arrange_types
     @no_skins = []
+    @too_many = []
   end
 
   def execute(game_state)
@@ -163,8 +164,21 @@ class LootProcess
   end
 
   def stow_lootables
+    pair = [checkleft, checkright]
+    should_pause = DRRoom.room_objs.length > 1
     @lootables.each do |item|
-      DRRoom.room_objs.grep(/#{item}/).each { |_| fput "stow #{item}" }
+      DRRoom.room_objs.grep(/\b#{item}/).each { |_| fput "stow #{item}" unless @too_many.include?(item.downcase) }
+    end
+    pause 1 if should_pause
+    if checkleft != pair.first # make function
+      echo("out of room, failed to store #{checkleft}")
+      @too_many.push(checkleft.downcase)
+      dispose_trash(checkleft)
+    end
+    if checkright != pair.last
+      echo("out of room, failed to store #{checkright}")
+      @too_many.push(checkright.downcase)
+      dispose_trash(checkright)
     end
   end
 
@@ -211,6 +225,7 @@ class LootProcess
       echo("adding #{mob_noun} to no skin list: #{@no_skins}") if $debug_mode
       @no_skins.push(mob_noun)
     end
+    pause 1
     waitrt?
     dispose_trash(checkleft) if snap.first != checkleft
     dispose_trash(checkright) if snap.last != checkright
@@ -376,12 +391,7 @@ class SpellProcess
     @cast_timer = nil
 
     return unless @after
-    if @after.kind_of?(Proc)
-      @after.call
-    else
-      @after.each{|args| bput(args.first, *args[1..-1])}
-    end
-
+    @after.each { |action| bput(action['message'], action['matches']) }
     @after = nil
   end
 
@@ -427,26 +437,40 @@ class SpellProcess
   end
 end
 
-class AbilityProcesss
-  def initialize(buffs:[])
+class AbilityProcess
+  include DRC
+
+  def initialize(buffs:[], kneel_khri:kneel_khri, khri_preps:khri_preps)
+    @khri = buffs.delete('khri') || []
     @buffs = buffs
     @cooldown_timers = {}
+    @kneel_khri = kneel_khri
+    @khri_preps = khri_preps
   end
 
-  def execute(_game_state)
-    check_nonspell_buffs
+  def execute(game_state)
+    check_nonspell_buffs(game_state)
     false
   end
 
   private
 
-  def check_nonspell_buffs
+  def check_nonspell_buffs(game_state)
     @buffs.each do |action, cooldown|
       timer = @cooldown_timers[action]
       next unless !timer || (Time.now - timer).to_i > cooldown
       @cooldown_timers[action] = Time.now
       fput action
       waitrt?
+    end
+    return if game_state['danger'] && @kneel_khri
+    @khri.select { |name| !DRSpells.active_spells["Khri #{name}"] }.each do |name|
+      timer = @cooldown_timers[name]
+      next unless !timer || (Time.now - timer).to_i > 30
+      fput('kneel') if @kneel_khri
+      @cooldown_timers[name] = Time.now if ['Your body is willing', 'You have not recovered'].include? bput("Khri #{name}", *@khri_preps + [/Your body is willing/, /You have not recovered/])
+      waitrt?
+      fput('stand') if @kneel_khri
     end
   end
 end
@@ -512,7 +536,7 @@ end
 class AttackProcess
   include DRC
 
-  def initialize(aim_fillers:[], aim_fillers_stealth:nil, charged_maneuvers:{}, dance_actions:[], dance_actions_stealth:nil, fatigue_regen_threshold:90, fatigue_regen_action:'bob', dual_load:dual_load, is_empath:false)
+  def initialize(aim_fillers:[], aim_fillers_stealth:nil, charged_maneuvers:{}, dance_actions:[], dance_actions_stealth:nil, fatigue_regen_threshold:90, fatigue_regen_action:'bob', dual_load:dual_load, is_empath:false, backstab:nil, ambush:ambush)
     @aim_fillers = aim_fillers
     @aim_fillers_stealth = aim_fillers_stealth
     @charged_maneuvers = charged_maneuvers
@@ -522,16 +546,25 @@ class AttackProcess
     @fatigue_regen_action = fatigue_regen_action
     @dual_load = dual_load
     @is_empath = is_empath
+    @backstab = backstab
+    @ambush = ambush
 
     @action_queue = []
     @dance_queue = []
     @cooldown_timers = {}
+    @no_stab_mobs = []
+    @no_stab_current_mob = false
     @loaded = false
     @selected_maneuver = ''
     Flags.add('ct-ranged-ready', 'You think you have your best shot possible now')
   end
 
   def execute(game_state)
+    if DRRoom.npcs.uniq.length == 1 && @no_stab_mobs.include?(DRRoom.npcs.uniq.first)
+      @no_stab_current_mob = true
+    elsif game_state['mob_died'] && @no_stab_current_mob
+      @no_stab_current_mob = false
+    end
     if game_state['dancing'] && !game_state['kill']
       dance
       return false
@@ -568,7 +601,15 @@ class AttackProcess
 
   def attack_melee(charged_maneuver, game_state)
     if charged_maneuver.empty?
-      command = game_state['weapon_skill'] == 'Offhand Weapon' ? 'attack left' : 'attack'
+      if @backstab == game_state['weapon_skill'] || (@ambush && DRSkill.getxp('Backstab').to_i < 34 && game_state['weapon_skill'] != 'Offhand Weapon')
+        fput('hide')
+        pause 1
+        waitrt?
+        hidden_attack = @no_stab_current_mob || @backstab != game_state['weapon_skill'] ? 'attack back' : 'backstab'
+        command = checkhidden ? hidden_attack : 'attack'
+      else
+        command = game_state['weapon_skill'] == 'Offhand Weapon' ? 'attack left' : 'attack'
+      end
       fput(command)
     else
       use_charged_maneuver(charged_maneuver)
@@ -576,7 +617,16 @@ class AttackProcess
 
     waitrt?
 
-    if reget(5, 'You aren\'t close enough to attack')
+    if reget(5, 'You can\'t backstab that')
+      if DRRoom.npcs.uniq.length == 1
+        @no_stab_mobs.push(DRRoom.npcs.first)
+      else
+        @no_stab_current_mob = true
+      end
+    end
+
+    if reget(5, 'You aren\'t close enough to attack', 'It would help if you were closer')
+      fput('eng')
       pause 6
     else
       game_state['action_count'] += 1
@@ -585,7 +635,7 @@ class AttackProcess
 
   def attack_thrown(game_state)
     weapon_name = checkright
-    fput 'lob'
+    bput('lob', 'roundtime', 'What are you trying to lob')
     waitrt?
     bput("get #{weapon_name}", 'You are already holding', "You pick up.*#{weapon_name}")
     game_state['action_count'] += 1
@@ -674,6 +724,7 @@ class CombatTrainer
   include DRC
 
   def stop
+    echo 'Received stop signal' if $debug_mode
     @stop = true
   end
 
@@ -717,6 +768,10 @@ class CombatTrainer
     dual_load = combat_vars.dual_load
     training_abilities = combat_vars.training_abilities
     is_empath = !combat_vars.empath.nil?
+    kneel_khri = combat_vars.kneel_khri
+    khri_preps = combat_vars.khri_preps
+    backstab = combat_vars.backstab
+    ambush = combat_vars.ambush
 
     $EquipmentManager.wear_equipment_set(worn_items) if worn_items
 
@@ -732,7 +787,7 @@ class CombatTrainer
     combat_processes = [
       SetupProcess.new(dance_threshold: dance_threshold, dance_skill: dance_skill, stances: stances, weapon_training: weapon_training, retreat_threshold: retreat_threshold),
       SpellProcess.new(buffs: buff_spells, ospells: offensive_spells, camb: cambrinth, casts: cast_messages, preps: prep_messages, is_empath: is_empath),
-      AbilityProcesss.new(buffs: buff_nonspells),
+      AbilityProcess.new(buffs: buff_nonspells, kneel_khri: kneel_khri, khri_preps: khri_preps),
       LootProcess.new(skin: skin, arrange_all: arrange_all, arrange_count: arrange_count, lootables: lootables, arrange_types: arrange_types),
       SafetyProcess.new,
       TrainerProcess.new(training_abilities: training_abilities),
@@ -742,7 +797,9 @@ class CombatTrainer
         dance_actions: dance_actions, dance_actions_stealth: dance_actions_stealth,
         fatigue_regen_threshold: fatigue_regen_threshold, fatigue_regen_action: fatigue_regen_action,
         dual_load: dual_load,
-        is_empath: is_empath
+        is_empath: is_empath,
+        backstab: backstab,
+        ambush: ambush
       )
     ]
 

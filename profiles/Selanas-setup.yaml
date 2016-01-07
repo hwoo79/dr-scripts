@@ -1,0 +1,176 @@
+---
+gear:
+- :description: some metal chain gloves
+  :name: gloves
+  :is_leather: false
+  :hinders_lockpicking: true
+  :is_worn: true
+- :description: a metal chain balaclava
+  :name: balaclava
+  :is_leather: false
+  :hinders_lockpicking: true
+  :is_worn: true
+- :description: a metal target shield
+  :name: shield
+  :is_leather: false
+  :hinders_lockpicking: true
+  :is_worn: true
+- :description: a leather cuirbouilli coat
+  :name: coat
+  :is_leather: true
+  :is_worn: true
+- :description: some rugged greaves
+  :name: greaves
+  :is_leather: true
+  :is_worn: true
+- :description: a polished steel parry stick
+  :name: parry stick
+  :is_leather: false
+  :is_worn: true
+- :description: some brass knuckles
+  :name: knuckles
+  :is_leather: false
+  :hinders_lockpicking: true
+  :is_worn: true
+- :description: some silver-chased elbow spikes
+  :name: spikes
+  :is_leather: false
+  :is_worn: true
+- :description: a long-handled throwing hammer with a steel head bearing the crest of the Clerics' Guild
+  :name: hammer
+  :is_leather: false
+  :is_worn: false
+- :description: a triple-weighted bola
+  :name: bola
+  :is_leather: false
+  :is_worn: false
+- :description: a steel rapier with a tempered blade
+  :name: rapier
+  :is_leather: false
+  :is_worn: false
+- :description: a sling
+  :name: sling
+  :is_leather: true
+  :is_worn: false
+gear_sets:
+  standard:
+  - a leather cuirbouilli coat
+  - some metal chain gloves
+  - a metal chain balaclava
+  - some rugged greaves
+  - a metal target shield
+  - a polished steel parry stick
+  - some brass knuckles
+  - some silver-chased elbow spikes
+worn_items: standard
+
+weapon_training:
+  Brawling: ''
+
+lootables:
+- rock
+- bolt
+- arrow
+- coin
+- map
+- scroll
+- bark
+- parchment
+- tsavorite
+- zircon
+- quartz
+- chalcedony
+- diopside
+- coral
+- moonstone
+- onyx
+- topaz
+- amber
+- pearl
+- chryso
+- lazuli
+- turquoise
+- bloodstone
+- hematite
+- morganite
+- sapphire
+- agate
+- carnelian
+- diamond
+- crystal
+- emerald
+- ruby
+- tourmaline
+- tanzanite
+- jade
+- ivory
+- sunstone
+- iolite
+- beryl
+- garnet
+- alexandrite
+- amethyst
+- citrine
+- aquamarine
+- star-stone
+- crystal
+- kunzite
+- stones
+- spinel
+- opal
+- peridot
+- andalusite
+- coffer
+- strongbox
+- chest
+- caddy
+- trunk
+- casket
+- skippet
+- crate
+- box
+
+skinning:
+  skin: true
+  arrange_all: false
+  arrange_count: 0
+dance_skill: Brawling
+dance_actions:
+- bob
+- analyze
+dance_actions_stealth:
+- hide
+- stalk
+- bob
+training_abilities:
+  Hunt:
+    :check: Perception
+    :cooldown: 80
+  App:
+    :check: Appraisal
+    :cooldown: 60
+
+training_spells:
+  Warding:
+    abbrev: IC
+  Augmentation:
+    abbrev: GOL
+    symbiosis: true
+  Utility:
+    abbrev: HW
+    symbiosis: true
+    cast: cast chest
+
+train_with_spells: true
+safe_room: 705
+hand_armor: gloves
+exit_on_skills_capped: false
+listen: false
+crossing_training:
+- First Aid
+- Appraisal
+- Augmentation
+- Utility
+- Warding
+- Performance
+- Scholarship
