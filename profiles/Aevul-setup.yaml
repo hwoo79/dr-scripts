@@ -183,10 +183,11 @@ buff_spells:
 buff_nonspells: {}
 thanatology:
   necro: true
+  ritual_type: dissect
 skinning:
   skin: true
-  arrange_all: false
-  arrange_count: 5
+  arrange_all: true
+  arrange_count: 1
 cambrinth: anklet
 charged_maneuvers:
   Brawling: palmstrike
@@ -200,7 +201,7 @@ charged_maneuvers:
   Twohanded Blunt: crash
   Staves: twirl
   Polearms: impale
-dance_threshold: 1
+dance_threshold: 0
 dance_skill: Small Edged
 dance_actions:
 - analyze
@@ -350,10 +351,13 @@ armor:
 - cowl
 - leathers
 - buckler
-prep_scaling_factor: 0.99
+prep_scaling_factor: 0.90
 
 # Pick settings
 
 picking_box_source: pack
 lockpick_type: master
+use_lockpick_ring: true
+harvest_traps: true
+
 #lockpick_buff: hol
