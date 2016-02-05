@@ -210,7 +210,7 @@ class LootProcess
     echo("necrocheck after game_state: #{@necro}") if $debug_mode
     if @necro
       echo("necrocheck in dispose_body: #{@necro}") if $debug_mode
-      check_thanatology(DRRoom.dead_npcs.first) # NECRO THANATOLOGY CHECK STUFF
+      check_thanatology(DRRoom.dead_npcs.first) 
       check_skinning(DRRoom.dead_npcs.first) if ['preserve'].include?(@ritual_type)
     elsif @skin
       check_skinning(DRRoom.dead_npcs.first, game_state)
@@ -220,23 +220,31 @@ class LootProcess
   end
 
   # partially completed, only works for a single ritual.
-  def check_thanatology(mob_noun) # NECRO THANATOLOGY RITUAL METHOD
+  def check_thanatology(mob_noun)
     echo("necrocheck2: #{@necro}") if $debug_mode
     echo("RITUALcheck: #{@ritual_type}") if $debug_mode
     return if @constructs.include?(mob_noun)
     arrange_mob(mob_noun) if @arrange_count > 0
-    perform_message = "perform #{@ritual_type} on #{mob_noun}"
-    case bput(perform_message, 'Rituals do not work upon constructs', 'precise motions with your ritual knife', 'corpse to make one long', 'carefully position the corpse', 'corpse and make a few quick precise cuts', 'roundtime')
-    when 'corpse to make one long', 'carefully position the corpse', 'corpse and make a few quick precise cuts'
-      return
-    when 'precise motions with your ritual knife'
-      waitrt?
-      fput 'drop material'
-      return
-    when 'Rituals do not work upon constructs'
-      echo("adding #{mob_noun} to constructs list: #{@constructs}") if $debug_mode
-      @constructs.push(mob_noun)
-      return
+    if @ritual_type = 'dissect'
+      perform_message = "perform #{@ritual_type} on #{mob_noun}"
+      case bput(perform_message, 'Rituals do not work upon constructs', 'precise motions with your ritual knife', 'corpse to make one long', 'carefully position the corpse', 'corpse and make a few quick precise cuts', 'roundtime')
+      when 'corpse to make one long', 'carefully position the corpse', 'corpse and make a few quick precise cuts'
+        return
+      when 'Rituals do not work upon constructs'
+        echo("adding #{mob_noun} to constructs list: #{@constructs}") if $debug_mode
+        @constructs.push(mob_noun)
+        return
+    elsif @ritual_type = 'harvest'
+      perform_message = "perform preserve on #{mob_noun}"
+      case bput(perform_message, 'Rituals do not work upon constructs', 'precise motions with your ritual knife', 'corpse to make one long', 'carefully position the corpse', 'corpse and make a few quick precise cuts', 'roundtime')
+      when 'corpse to make one long', 'carefully position the corpse', 'corpse and make a few quick precise cuts'
+        waitrt?
+        perform_message = "perform harvest on #{mob_noun}"
+        when 'precise motions with your ritual knife'
+        waitrt?
+        fput 'drop material'
+       return
+
     end
     waitrt?
     # Need to call something here to dispose of the harvested "thing" if perform harvest is used.
