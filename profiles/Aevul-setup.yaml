@@ -55,18 +55,21 @@ gear:
   :hinders_lockpicking: 
   :is_worn: false
   :swappable: false
+  :attack_type: slice
 - :description: a bastard sword
   :name: sword
   :is_leather: false
   :hinders_lockpicking: 
   :is_worn: false
   :swappable: true
+  :attack_type: slice
 - :description: a steel duraka skefne
   :name: skefne
   :is_leather: false
   :hinders_lockpicking: 
   :is_worn: false
   :swappable: false
+  :attack_type: jab
 gear_sets:
   standard:
   - some lumium scale gloves
@@ -305,10 +308,8 @@ treasure_nouns:
 exp_timers:
   Stealth:
     cooldown: 300
-    timer: 2015-12-30 20:53:55.656555000 -06:00
   First Aid:
     cooldown: 360
-    timer: 2015-12-30 20:53:55.656555000 -06:00
   Locksmithing:
     cooldown: 600
     timer: 
